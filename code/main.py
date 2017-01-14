@@ -21,7 +21,9 @@ def write_to_xls(csv,path,n):
             lines = f.readlines()
             for line in lines:
                 line_no_stop = []
+                line = re.sub('<[^>]*>','', line)
                 line = re.sub('\d','',line)
+                line = re.sub(r'[^\w\s]','',line)
                 line = line.strip()
                 for word in line.split():
                     if word not in stopwords:
@@ -40,20 +42,6 @@ def average_len_words(lst):
     for document in lst:
         all_lens.append(len(document.split()))
     return np.mean(all_lens)
-
-def most_informative_feature_for_binary_classification(vectorizer, classifier, n=10):
-    class_labels = classifier.classes_
-    feature_names = vectorizer.get_feature_names()
-    topn_class1 = sorted(zip(classifier.coef_[0], feature_names))[:n]
-    topn_class2 = sorted(zip(classifier.coef_[0], feature_names))[-n:]
-
-    for coef, feat in topn_class1:
-        print class_labels[0], coef, feat
-
-    print
-
-    for coef, feat in reversed(topn_class2):
-        print class_labels[1], coef, feat
 
 if __name__ == "__main__":
     number_of_documents = 1000
@@ -110,8 +98,6 @@ if __name__ == "__main__":
         precision = sklearn.metrics.precision_score(y_test, predictions, pos_label=0)
         precision_list.append(precision)
 
-
-        most_informative_feature_for_binary_classification(v,clf)
         print metrics.classification_report(y_test, predictions, target_names=["Legal", "Non-legal"])
         total_predictions = total_predictions + list(predictions)
     overall_accuracy = np.mean(accuracy_list)
